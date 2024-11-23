@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Photo</title>
+</head>
+<body>
+    <h1>Take a Photo</h1>
+    
+    <!-- 单选框 -->
+    <label>
+        <input type="checkbox" id="autoUpload"> 自动上传照片
+    </label>
+    
+    <input type="file" accept="image/*" capture="camera" id="fileInput">
+    <button onclick="upload()">Upload</button>
+
+    <script>
+        function upload(file) {
+            const input = document.getElementById('fileInput');
+            if (!file) {
+                file = input.files[0];
+            }
+            if (!file) {
+                alert('Please select a file.');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            fetch('/upload', {
+                method: 'POST',
+                body: formData,
+            })
+            .then(response => response.text())
+            .then(data => {
+                alert(data);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+
+        document.getElementById('fileInput').addEventListener('change', function() {
+            const autoUpload = document.getElementById('autoUpload').checked;
+            if (autoUpload) {
+                upload(this.files[0]);
+                this.value = ''; // 清空文件输入
+            }
+        });
+    </script>
+</body>
+</html>
