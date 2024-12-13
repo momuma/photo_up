@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Photo</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        #uploadButton, #photoButton {
+            width: 200px;
+            height: 100px;
+            font-size: 20px;
+            margin: 10px;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        #photoButton {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>Take a Photo</h1>
+    
+    <label>
+        <input type="checkbox" id="autoUpload" checked> 自动上传照片
+    </label>
+    
+    <input type="file" accept="image/*" capture="camera" id="fileInput">
+
+    <button id="uploadButton" onclick="upload()">Upload</button>
+    <button id="photoButton" onclick="document.getElementById('fileInput').click();">点击拍照</button>
+
+    <script>
+		//显示自动关闭的提示框,showTemporaryAlert函数用于自动关闭上传成功的提示
+        function showTemporaryAlert(message, duration = 3000) {
+            const alertBox = document.createElement('div');
+            alertBox.innerText = message;
+            alertBox.style.position = 'fixed';
+            alertBox.style.top = '50%';
+            alertBox.style.left = '50%';
+            alertBox.style.transform = 'translate(-50%, -50%)';
+            alertBox.style.backgroundColor = '#4CAF50';
+            alertBox.style.color = 'white';
+            alertBox.style.padding = '20px';
+            alertBox.style.borderRadius = '5px';
+            alertBox.style.zIndex = '1000';
+            document.body.appendChild(alertBox);
+
+            setTimeout(() => {
+                document.body.removeChild(alertBox);
+            }, duration);
+        }
+
+        function upload(file) {
+            const input = document.getElementById('fileInput');
+            if (!file) {
+                file = input.files[0];
+            }
+            if (!file) {
+                showTemporaryAlert('Please select a file.');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            fetch('/upload', {
+                method: 'POST',
+                body: formData,
+            })
+            .then(response => response.text())
+            .then(data => {
+                showTemporaryAlert(data); // 使用自动关闭的弹窗
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showTemporaryAlert('Error during upload.', 2000); // 错误信息显示 2 秒
+            });
+        }
+
+        document.getElementById('fileInput').addEventListener('change', function() {
+            const autoUpload = document.getElementById('autoUpload').checked;
+            if (autoUpload) {
+                upload(this.files[0]);
+                this.value = ''; // 清空文件输入
+            }
+        });
+    </script>
+</body>
+</html>
